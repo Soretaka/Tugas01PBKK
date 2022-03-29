@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\GuestController;
+use App\Http\Controllers\FormController;
+use App\Models\Category;
+use App\Models\User;
+Route: use App\Http\Controllers\ArticleController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,28 +21,26 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::get('/input', [FormController::class, 'input'])->name("tambah-biodata");
+Route::post('/input/proses', [FormController::class, 'proses'])->name("tambah-biodata-post");
 
-Route::get('/baru', function () {
-    return view('dashboardbaru');
-})->middleware(['auth'])->name('baru');
 
-// Route::get('/confirm-password', function () {
-//     return view('auth.confirm-password');
-// })->middleware('auth')->name('password.confirm');
+Route::get("/article", [ArticleController::class, 'index']);
+Route::get('/article/{article:slug}', [ArticleController::class, 'content']);
 
-Route::post('/confirm-password', function (Request $request) {
-    if (! Hash::check($request->password, $request->user()->password)) {
-        return back()->withErrors([
-            'password' => ['The provided password does not match our records.']
-        ]);
-    }
+Route::get('/categories', function(){
+    return view('categories',[
+        'title' => 'Post Categories',
+        'categories' => Category::all()
+    ]);
+});
 
-    $request->session()->passwordConfirmed();
+Route::get('/categories/{category:slug}',function(Category $category){
+     return view ('article',[
+        'title' => $category->name,
+        'articles' => $category->article,
+        'category' => $category->name
+    ]);
+ });
 
-    return redirect()->intended('settings');
-})->middleware(['auth', 'throttle:2,100'])->name('password.confirm');
-
-require __DIR__.'/auth.php';
+ ?>
